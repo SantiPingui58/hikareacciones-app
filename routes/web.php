@@ -23,4 +23,6 @@ Route::get('auth/twitch', [AuthController::class, 'twitchLogin']);
 Route::get('auth/twitch/callback', [AuthController::class, 'twitchCallback']);
 Route::get('/panel', [AuthController::class, 'showPanel'])->name('panel');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::post('/request-access', [GoogleDriveController::class, 'requestAccess'])->name('request.access');
+Route::post('/request-access', [GoogleDriveController::class, 'accessFromForm']);
+
+

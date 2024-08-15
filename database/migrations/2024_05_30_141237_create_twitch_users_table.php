@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('display_name');
             $table->string('profile_image_url');
             $table->string('email');
+            $table->boolean('sub_activa')->default(false);
+            $table->date('end_sub_date')->nullable();
             $table->timestamps();
         });
     }

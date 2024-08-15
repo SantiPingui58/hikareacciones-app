@@ -1,14 +1,14 @@
 <?php
 use App\Models\TwitchUser;
 
+// Obtener el usuario basado en el ID de Twitch almacenado en la sesión
 $user = TwitchUser::where('twitch_id', session('user_id'))->first();
 if (!$user) {
     return redirect()->route('home');
 }
 
 // Verificar si el usuario se creó hace menos de 5 segundos
-$isRecentlyCreated = $user->created_at->diffInSeconds(now()) < 5;
-
+$isRecentlyCreated = session('new_user');
 ?>
 
 @if(session('success'))
@@ -22,6 +22,8 @@ $isRecentlyCreated = $user->created_at->diffInSeconds(now()) < 5;
         {{ session('error') }}
     </div>
 @endif
+
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -59,6 +61,12 @@ $isRecentlyCreated = $user->created_at->diffInSeconds(now()) < 5;
         .btn-logout:hover {
             background-color: #c82333;
         }
+        .modal .modal-body {
+            text-align: center;
+        }
+        .modal .modal-body strong {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -72,24 +80,16 @@ $isRecentlyCreated = $user->created_at->diffInSeconds(now()) < 5;
                         <img src="{{ $user->profile_image_url }}" class="rounded-circle" alt="Perfil de Twitch" width="150">
                         <form action="/request-access" method="POST">
                             @csrf
-                            <?php if (!$isRecentlyCreated): ?>
                                 <a href="https://drive.google.com/drive/folders/14ujv5c_kCP0sv_incV6s-Oic0w_ABeA3?usp=drive_link" target="_blank" class="btn btn-success btn-lg mb-3">Ir al Google Drive</a>
                                 <div class="form-group">
                                     <label for="email">Si deseas modificar tu email de acceso al Drive, ingresa un nuevo correo electrónico:</label>
                                 </div>
-                            <?php else: ?>
-                                <div class="form-group">
-                                    <label for="email">Bienvenido, para solicitar acceso al Drive donde se suben todas las VODs deberás ingresar tu email y dar click al botón de solicitar acceso.</label>
-                                </div>
-                            <?php endif; ?>
                             <div class="form-group">
                                 <input type="email" class="form-control" id="email" name="email" value="{{ $user->email }}" required>
                             </div>
-                            <?php if ($isRecentlyCreated): ?>
-                                <button type="submit" class="btn btn-primary btn-lg">Solicitar Acceso a Drive</button>
-                            <?php else: ?>
-                                <button type="submit" class="btn btn-primary btn-lg">Modificar Email de Acceso a Drive</button>
-                            <?php endif; ?>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                {{ 'Modificar Email de Acceso a Drive'}}
+                            </button>
                         </form>
                         <a href="/logout" class="btn btn-danger mt-3">Cerrar Sesión</a>
                     </div>
@@ -98,9 +98,35 @@ $isRecentlyCreated = $user->created_at->diffInSeconds(now()) < 5;
         </div>
     </div>
 
-    <!-- Bootstrap JS and dependencies -->
+    <!-- Modal -->
+    @if ($isRecentlyCreated)
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Usuario Registrado</h5>
+                </div>
+                <div class="modal-body">
+                    ¡Usuario registrado correctamente! El correo electrónico de acceso al Drive es <strong>{{ $user->email }}</strong>. Puedes modificarlo en la siguiente ventana si lo deseas o si tienes problemas para acceder al Drive.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+    
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+    @if ($isRecentlyCreated)
+        $(document).ready(function() {
+            $('#successModal').modal('show');
+        });
+    @endif
+    </script>
 </body>
 </html>
