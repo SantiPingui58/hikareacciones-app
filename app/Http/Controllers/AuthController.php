@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\TwitchUser;
 use App\Http\Controllers\GoogleDriveController;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -24,6 +25,7 @@ class AuthController extends Controller
 
     public function twitchCallback(Request $request)
     {
+		
         // Obtener el token de acceso
         $response = Http::asForm()->post('https://id.twitch.tv/oauth2/token', [
             'client_id' => env('TWITCH_CLIENT_ID'),
@@ -48,24 +50,27 @@ class AuthController extends Controller
                 'sub_activa' => false, // Usar valor booleano
             ]
         );
-        
+		Log::info('Login o registro del user: '. $twitchUser->id);
 
            // Verificar si el usuario es nuevo
            $isNewUser = $twitchUser->wasRecentlyCreated;
-
+	Log::info('Nuevo usuario: '. $isNewUser);
            // Guardar en la sesión si el usuario es nuevo
            session(['new_user' => $isNewUser]);
 
         // Verificar si el usuario tiene una suscripción activa
         if ($this->hasSuscription($userInfo['id'], $accessToken)) {
-            if ($twitchUser->sub_activa == 0) {
+			Log::info($twitchUser->display_name.' tiene suscripcion activa');
+            if ($twitchUser->sub_activa == 0) {			
                 // Si no tenía una suscripción activa, se la activamos
                 $twitchUser->sub_activa = 1;
                 $twitchUser->end_sub_date = Carbon::now()->addDays(33);
                 $twitchUser->save();
+				Log::info('Activando suscripcion en BBDD para '.$twitchUser->display_name.'. Finaliza el: '.$twitchUser->end_sub_date);
                 $googleDriveController = new GoogleDriveController();
-                //$googleDriveController->requestAccess($user->email);
-                $googleDriveController->requestAccess('test@gmail.santi.com');
+				Log::info('Solicitando acceso al Drive para '.$twitchUser->display_name);
+                $googleDriveController->access( $twitchUser->email);
+				
             }
 
             session(['user_id' => $userInfo['id']]);

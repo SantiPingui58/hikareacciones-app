@@ -7,6 +7,7 @@ use Google_Client;
 use Google_Service_Drive;
 use Google_Service_Drive_Permission;
 use App\Models\TwitchUser;
+use Illuminate\Support\Facades\Log;
 
 class GoogleDriveController extends Controller
 {
@@ -25,6 +26,7 @@ class GoogleDriveController extends Controller
 
 // Verificar si ya existe algún otro usuario con el mismo email
 if (TwitchUser::where('email', $newUserEmail)->where('twitch_id', '!=', $user->twitch_id)->exists()) {
+	Log::warning('El usuario '.$user->id. ' ha intentado registrar el mail de otra persona: '.$newUserEmail);
     return redirect()->back()->with('error', 'El email '.$newUserEmail.' está asociado a otra cuenta de Twitch.');
 }
 
@@ -32,7 +34,6 @@ $currentUserEmail = $user->email;
 // Actualizar el email del usuario
 $user->email = $newUserEmail;
 $user->save();
-
 
             // ID del archivo al que deseas dar acceso
             $fileId = "1CZtJ_yJFXrzoe5-uCWSnYaF5liQYl1gn";
@@ -54,8 +55,6 @@ $user->save();
                         $driveService->permissions->delete($fileId, $permission->getId());
                     }
                 }
-                //Todo el codigo de aca en adelante no se ejcuta, queda una pagina en blanco
-
 
               
                 // Crea un nuevo objeto de permiso
@@ -67,12 +66,14 @@ $user->save();
 
                 // Agrega el nuevo permiso al archivo
                 $driveService->permissions->create($fileId, $newPermission);
-
+			Log::info('Drive compartido con: '.$newUserEmail);
 
             } catch (\Exception $e) {
+				Log::error('Error al compartir Drive:'. $e->getMessage());
                 return redirect('/panel')->with('error', 'Error al compartir el archivo: ' . $e->getMessage());
             }
         
+	
          return redirect('/panel')->with('success', 'Se ha compartido el archivo correctamente con ' . $newUserEmail); 
     }
 }
