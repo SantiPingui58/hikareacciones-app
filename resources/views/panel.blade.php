@@ -80,7 +80,7 @@ $isRecentlyCreated = session('new_user');
                         <img src="{{ $user->profile_image_url }}" class="rounded-circle" alt="Perfil de Twitch" width="150">
                         <form action="/request-access" method="POST">
                             @csrf
-                                <a href="https://drive.google.com/drive/folders/14ujv5c_kCP0sv_incV6s-Oic0w_ABeA3?usp=drive_link" target="_blank" class="btn btn-success btn-lg mb-3">Ir al Google Drive</a>
+                                <a href="https://drive.google.com/drive/folders/1CZtJ_yJFXrzoe5-uCWSnYaF5liQYl1gn?usp=drive_link" target="_blank" class="btn btn-success btn-lg mb-3">Ir al Google Drive</a>
                                 <div class="form-group">
                                     <label for="email">Si deseas modificar tu email de acceso al Drive, ingresa un nuevo correo electrónico:</label>
                                 </div>

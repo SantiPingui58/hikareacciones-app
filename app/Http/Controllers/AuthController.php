@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\TwitchUser;
 use App\Http\Controllers\GoogleDriveController;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -24,6 +25,7 @@ class AuthController extends Controller
 
     public function twitchCallback(Request $request)
     {
+		
         // Obtener el token de acceso
         $response = Http::asForm()->post('https://id.twitch.tv/oauth2/token', [
             'client_id' => env('TWITCH_CLIENT_ID'),
@@ -37,38 +39,45 @@ class AuthController extends Controller
 
         // Obtener la información del usuario
         $userInfo = $this->getUserInfo($accessToken);
-
+		Log::info('User Info: ' . json_encode($userInfo));
         // Buscar o crear el usuario en la base de datos
         $twitchUser = TwitchUser::firstOrCreate(
             ['twitch_id' => $userInfo['id']],
             [
                 'display_name' => $userInfo['display_name'],
                 'profile_image_url' => $userInfo['profile_image_url'],
-                'email' => $userInfo['email'],
+                   'email' => $userInfo['email'] ?? null, 
                 'sub_activa' => false, // Usar valor booleano
             ]
         );
-        
+		Log::info('Login o registro del user: '. $twitchUser->id);
 
            // Verificar si el usuario es nuevo
            $isNewUser = $twitchUser->wasRecentlyCreated;
-
+	Log::info('Nuevo usuario: '. $isNewUser);
            // Guardar en la sesión si el usuario es nuevo
            session(['new_user' => $isNewUser]);
-
+		   session(['user_id' => $userInfo['id']]);
         // Verificar si el usuario tiene una suscripción activa
         if ($this->hasSuscription($userInfo['id'], $accessToken)) {
-            if ($twitchUser->sub_activa == 0) {
+			Log::info($twitchUser->display_name.' tiene suscripcion activa');
+            if ($twitchUser->sub_activa <= 0) {			
                 // Si no tenía una suscripción activa, se la activamos
                 $twitchUser->sub_activa = 1;
                 $twitchUser->end_sub_date = Carbon::now()->addDays(33);
                 $twitchUser->save();
-                $googleDriveController = new GoogleDriveController();
-                //$googleDriveController->requestAccess($user->email);
-                $googleDriveController->requestAccess('test@gmail.santi.com');
+				Log::info('Activando suscripcion en BBDD para '.$twitchUser->display_name.'. Finaliza el: '.$twitchUser->end_sub_date);
+				if (!is_null($twitchUser->email)) {
+					$googleDriveController = new GoogleDriveController();
+					Log::info('Solicitando acceso al Drive para ' . $twitchUser->display_name . ' con email: ' . $twitchUser->email);
+					$googleDriveController->access($twitchUser->email);
+				} else {
+					Log::warning('No se puede solicitar acceso al Drive. Email nulo para ' . $twitchUser->display_name);
+				}
+				
             }
 
-            session(['user_id' => $userInfo['id']]);
+            
             return redirect()->route('panel')->with('twitchUser', $twitchUser);
         } else {
             return redirect()->route('home')->with('error', 'No estás suscrito al canal de hikarilof!');
