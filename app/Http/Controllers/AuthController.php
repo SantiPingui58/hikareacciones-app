@@ -39,14 +39,14 @@ class AuthController extends Controller
 
         // Obtener la información del usuario
         $userInfo = $this->getUserInfo($accessToken);
-		Log::info('User Info: ' . json_encode($userInfo));
+        Log::info('User Info: ' . json_encode($userInfo));
         // Buscar o crear el usuario en la base de datos
         $twitchUser = TwitchUser::firstOrCreate(
             ['twitch_id' => $userInfo['id']],
             [
                 'display_name' => $userInfo['display_name'],
                 'profile_image_url' => $userInfo['profile_image_url'],
-                   'email' => $userInfo['email'] ?? null, 
+                'email' => $userInfo['email'] ?? null, 
                 'sub_activa' => false, // Usar valor booleano
             ]
         );
@@ -57,37 +57,29 @@ class AuthController extends Controller
 	Log::info('Nuevo usuario: '. $isNewUser);
            // Guardar en la sesión si el usuario es nuevo
            session(['new_user' => $isNewUser]);
-		   session(['user_id' => $userInfo['id']]);
+           session(['user_id' => $userInfo['id']]);
         // Verificar si el usuario tiene una suscripción activa
         if ($this->hasSuscription($userInfo['id'], $accessToken)) {
 			Log::info($twitchUser->display_name.' tiene suscripcion activa');
-<<<<<<< HEAD
             if ($twitchUser->sub_activa == 0) {			
-=======
-            if ($twitchUser->sub_activa <= 0) {			
->>>>>>> 0bc4d77c3cbe75ac4c06a6d42ebcfa4e3ef7d418
                 // Si no tenía una suscripción activa, se la activamos
                 $twitchUser->sub_activa = 1;
                 $twitchUser->end_sub_date = Carbon::now()->addDays(33);
                 $twitchUser->save();
 				Log::info('Activando suscripcion en BBDD para '.$twitchUser->display_name.'. Finaliza el: '.$twitchUser->end_sub_date);
-<<<<<<< HEAD
                 $googleDriveController = new GoogleDriveController();
-				Log::info('Solicitando acceso al Drive para '.$twitchUser->display_name);
+                Log::info('Solicitando acceso al Drive para ' . $twitchUser->display_name . ' con email: ' . $twitchUser->email);
                 $googleDriveController->access( $twitchUser->email);
-=======
-				if (!is_null($twitchUser->email)) {
-					$googleDriveController = new GoogleDriveController();
-					Log::info('Solicitando acceso al Drive para ' . $twitchUser->display_name . ' con email: ' . $twitchUser->email);
-					$googleDriveController->access($twitchUser->email);
-				} else {
-					Log::warning('No se puede solicitar acceso al Drive. Email nulo para ' . $twitchUser->display_name);
-				}
->>>>>>> 0bc4d77c3cbe75ac4c06a6d42ebcfa4e3ef7d418
 				
             }
 
-            
+            if (!is_null($twitchUser->email)) {
+                $googleDriveController = new GoogleDriveController();
+                Log::info('Solicitando acceso al Drive para ' . $twitchUser->display_name . ' con email: ' . $twitchUser->email);
+                $googleDriveController->access($twitchUser->email);
+            } else {
+                Log::warning('No se puede solicitar acceso al Drive. Email nulo para ' . $twitchUser->display_name);
+            }
             return redirect()->route('panel')->with('twitchUser', $twitchUser);
         } else {
             return redirect()->route('home')->with('error', 'No estás suscrito al canal de hikarilof!');
@@ -131,4 +123,33 @@ class AuthController extends Controller
         // Redirigir a la página de inicio
         return redirect()->route('home');
     }
+
+  // Método para obtener la lista de suscriptores del canal
+  public function getSubscribers(Request $request)
+  {
+    $response = Http::asForm()->post('https://id.twitch.tv/oauth2/token', [
+        'client_id' => env('TWITCH_CLIENT_ID'),
+        'client_secret' => env('TWITCH_CLIENT_SECRET'),
+        'grant_type' => 'client_credentials',
+        'scope' => 'channel:read:subscriptions',
+    ]);
+
+      $accessToken = $response->json()['access_token'];
+      $broadcasterId = '697850700'; 
+
+      $response = Http::withHeaders([
+          'Authorization' => 'Bearer ' . $accessToken,
+          'Client-Id' => env('TWITCH_CLIENT_ID'),
+      ])->get("https://api.twitch.tv/helix/subscriptions", [
+          'broadcaster_id' => $broadcasterId
+      ]);
+
+      if ($response->successful()) {
+          $subscribers = $response->json()['data'];
+          return response()->json($subscribers);
+      } else {
+          return response()->json(['error' => 'No se pudieron obtener los suscriptores'], 400);
+      }
+  }
+
 }
