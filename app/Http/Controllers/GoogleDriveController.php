@@ -21,6 +21,7 @@ class GoogleDriveController extends Controller
     {
         $user = TwitchUser::where('twitch_id', session('user_id'))->first();
         if (!$user || !$user->sub_activa) {
+			Log::warning('El usuario'.$user->display_name.' figura que no existe o tiene sub no activa en BBDD');
             return redirect()->route('home');
         }
 
@@ -34,7 +35,7 @@ $currentUserEmail = $user->email;
 // Actualizar el email del usuario
 $user->email = $newUserEmail;
 $user->save();
-
+Log::warning('Actualizando el email del usuario '.$user->display_name);
             // ID del archivo al que deseas dar acceso
             $fileId = "1CZtJ_yJFXrzoe5-uCWSnYaF5liQYl1gn";
 
