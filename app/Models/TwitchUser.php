@@ -15,5 +15,8 @@ class TwitchUser extends Model
         'profile_image_url',
         'email',
         'subscription_end',
+        'access_token', 
+          'refresh_token',
+        'token_expiration', 
     ];
 }
