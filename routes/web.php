@@ -14,7 +14,7 @@ use App\Http\Controllers\GoogleDriveController;
 |
 */
 
-Route::get('/', [AuthController::class, 'index'])->name('index');
+Route::get('/', [AuthController::class, 'index'])->name('home');
 Route::get('auth/twitch', [AuthController::class, 'twitchLogin']);
 Route::get('auth/twitch/callback', [AuthController::class, 'twitchCallback']);
 Route::get('/panel', [AuthController::class, 'showPanel'])->name('panel');
