@@ -57,6 +57,7 @@ class RefreshTwitchToken extends Command
                 $twitchUser->save();
 
                 $this->info('Token y fecha de expiración actualizados correctamente.');
+                \Log::info('El comando twitch:refresh-token se ejecutó correctamente.');
             } else {
                 $this->error('Error al actualizar el token de Twitch.');
             }
