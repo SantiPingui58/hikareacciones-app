@@ -12,10 +12,13 @@ use Illuminate\Support\Facades\Log;
 class AuthController extends Controller
 {
 
-    public function index() {
+   public function index() {
+    // Suponiendo que getSubscribers() devuelve un JSON, lo decodificamos a un array
     $subscribers = $this->getSubscribers();
+    $subscribers = json_decode($subscribers, true);
     return view('home', ['subscribers' => $subscribers]);
-    }
+}
+
 
 
     public function twitchLogin()
@@ -154,49 +157,90 @@ class AuthController extends Controller
         return redirect()->route('home');
     }
 
-    public function getSubscribers()
-    {
-        // Recuperar el usuario de Hika desde la base de datos
-        $twitchUser = TwitchUser::where('twitch_id', 697850700)->first();  // Puedes cambiar el ID a otro si es necesario
-    
-        // Verificar si el usuario está autenticado y tiene un access_token
-        if (!$twitchUser || !$twitchUser->access_token) {
-            return response()->json(['error' => 'La página actualmente no funciona.'], 401);
-        }
-    
-        // Utilizar el access_token del usuario autenticado
-        $accessToken = $twitchUser->access_token;
-    
-        // Obtener el broadcaster_id desde el usuario de Twitch o configurarlo manualmente
-        $broadcasterId = $twitchUser->twitch_id;  // Usamos el ID del broadcaster del usuario autenticado
-    
+  public function getSubscribers()
+{
+    // Recuperar el usuario de Hika desde la base de datos
+    $twitchUser = TwitchUser::where('twitch_id', 697850700)->first();
+
+    if (!$twitchUser || !$twitchUser->access_token) {
+        return response()->json(['error' => 'La página actualmente no funciona.'], 401);
+    }
+
+    $accessToken = $twitchUser->access_token;
+    $broadcasterId = $twitchUser->twitch_id; 
+    $allSubscribers = [];
+    $cursor = null;
+
+    do {
         // Realizar la solicitud a la API de Twitch para obtener los suscriptores
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
             'Client-Id' => env('TWITCH_CLIENT_ID'),
         ])->get("https://api.twitch.tv/helix/subscriptions", [
-            'broadcaster_id' => $broadcasterId
+            'broadcaster_id' => $broadcasterId,
+            'after' => $cursor,  
+            'first' => 100  
         ]);
-    
-        // Verificar si la respuesta fue exitosa
-        if ($response->successful()) {
-            // Obtener los datos de los suscriptores
-            $subscribers = $response->json()['data'];
 
+
+        if ($response->successful()) {
+            $subscribers = $response->json()['data'];
+			$missingProfileUsers = [];
             foreach ($subscribers as &$subscriber) {
-                $twitchUser = TwitchUser::where('twitch_id', $subscriber['user_id'])->first();
-                $subscriber['profile_image_url'] = $twitchUser ? $twitchUser->profile_image_url : null;
+				 $twitchUser = TwitchUser::where('twitch_id', $subscriber['user_id'])->first();
+				if ($twitchUser && $twitchUser->profile_image_url) {
+					$subscriber['profile_image_url'] = $twitchUser->profile_image_url;
+				} else {
+					$missingProfileUsers[] = $subscriber['user_id'];
+				}
+            }
+			
+			
+			 if (!empty($missingProfileUsers)) {
+                $userResponse = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Client-Id' => env('TWITCH_CLIENT_ID'),
+                ])->get('https://api.twitch.tv/helix/users', [
+                    'id' => $missingProfileUsers
+                ]);
+
+                if ($userResponse->successful()) {
+                    $userData = $userResponse->json()['data'] ?? [];
+
+                    foreach ($userData as $user) {
+                        TwitchUser::updateOrCreate(
+                            ['twitch_id' => $user['id']],
+                            [
+                                'profile_image_url' => $user['profile_image_url'],
+                                'display_name' => $user['display_name']
+                            ]
+                        );
+
+                        foreach ($subscribers as &$subscriber) {
+                            if ($subscriber['user_id'] === $user['id']) {
+                                $subscriber['profile_image_url'] = $user['profile_image_url'];
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
-            Log::info('Subscribers ' . json_encode($subscribers));
-            return response()->json($subscribers);
+
+            $allSubscribers = array_merge($allSubscribers, $subscribers);
+
+            $cursor = $response->json()['pagination']['cursor'] ?? null;
+
         } else {
-            // Si no fue exitosa, capturar el mensaje de error
             $errorMessage = $response->json()['message'] ?? 'No se pudieron obtener los suscriptores';
             $errorCode = $response->json()['status'] ?? 400;
             return response()->json(['error' => $errorMessage], $errorCode);
         }
-    }
+    } while ($cursor);  
+
+    return response()->json($allSubscribers)->getContent();
+}
+
     
 
 }

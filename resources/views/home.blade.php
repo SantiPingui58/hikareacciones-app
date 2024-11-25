@@ -19,6 +19,16 @@
             border: none;
             border-radius: 15px;
             box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: scale(1.1); 
+        }
+        .card-img-top {
+            max-height: 200px;
+            object-fit: cover;
         }
         .btn-custom {
             background-color: #9146FF;
@@ -34,6 +44,9 @@
         .btn-discord:hover {
             background-color: #5b6eae;
         }
+		h2 {
+    color: black;
+}
     </style>
 </head>
 <body>
@@ -54,40 +67,27 @@
             </div>
         </div>
 
-        <!-- Carrusel de suscriptores -->
+        <!-- Título de Suscriptores -->
         <div class="row mt-5">
             <div class="col-12">
-                <div id="subscriberCarousel" class="carousel slide" data-ride="carousel">
-                    <div class="carousel-inner">
-                        <!-- Aquí se mostrarán las tarjetas de los suscriptores -->
-                        @foreach ($subscribers as $index => $subscriber)
-                        @php
-        Log::info($subscriber); 
-    @endphp
-                            <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
-                                <div class="card">
-                                <img src="{{ $subscriber->profile_image_url }}" class="card-img-top" alt="Imagen de perfil">
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ $subscriber['user_name'] }}</h5>
-                                        <p class="card-text">¡Gracias por ser un suscriptor!</p>
-                                        <a href="https://twitch.tv/{{ $subscriber->user_name }}" class="btn btn-custom">Ver Canal</a>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <!-- Controles del carrusel -->
-                    <a class="carousel-control-prev" href="#subscriberCarousel" role="button" data-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Anterior</span>
-                    </a>
-                    <a class="carousel-control-next" href="#subscriberCarousel" role="button" data-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Siguiente</span>
-                    </a>
-                </div>
+                <h2 class="text-center text-white">Suscriptores del canal</h2>
             </div>
+        </div>
+
+        <!-- Fila de suscriptores -->
+        <div class="row mt-3">
+            <!-- Aquí se mostrarán las tarjetas de los suscriptores -->
+            @foreach ($subscribers as $index => $subscriber)
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 mb-4">
+                    <div class="card">
+                        <!-- Imagen de perfil o imagen por defecto -->
+                       <img src="{{ $subscriber['profile_image_url'] ?? asset('images/user.jpg') }}" class="card-img-top" alt="Imagen de perfil">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ $subscriber['user_name'] }}</h5>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
         </div>
     </div>
 
