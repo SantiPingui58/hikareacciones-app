@@ -148,7 +148,9 @@ class AuthController extends Controller
           $subscribers = $response->json()['data'];
           return response()->json($subscribers);
       } else {
-          return response()->json(['error' => 'No se pudieron obtener los suscriptores'], 400);
+        $errorMessage = $response->json()['message'] ?? 'No se pudieron obtener los suscriptores';
+        $errorCode = $response->json()['status'] ?? 400; 
+        return response()->json(['error' => $errorMessage], $errorCode);
       }
   }
 
