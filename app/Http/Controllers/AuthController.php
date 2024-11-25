@@ -13,7 +13,6 @@ class AuthController extends Controller
 {
 
    public function index() {
-    // Suponiendo que getSubscribers() devuelve un JSON, lo decodificamos a un array
     $subscribers = $this->getSubscribers();
     $subscribers = json_decode($subscribers, true);
     return view('home', ['subscribers' => $subscribers]);
@@ -141,13 +140,15 @@ class AuthController extends Controller
 
     public function showPanel()
     {
-        $user = TwitchUser::where('twitch_id', session('user_id'))->first();
-        
+        $user = TwitchUser::where('twitch_id', session('user_id'))->first();      
         if (!$user) {
             return redirect()->route('home');
         }
+        $subscribers = $this->getSubscribers(); 
+        $subscribers = json_decode($subscribers, true);
+
     
-        return view('panel', compact('user')); 
+        return view('panel', compact('user','suscribers')); 
     }
     
     public function logout(Request $request)
