@@ -182,6 +182,13 @@ class AuthController extends Controller
         if ($response->successful()) {
             // Obtener los datos de los suscriptores
             $subscribers = $response->json()['data'];
+
+            foreach ($subscribers as &$subscriber) {
+                $twitchUser = TwitchUser::where('twitch_id', $subscriber['user_id'])->first();
+                $subscriber['profile_image_url'] = $twitchUser ? $twitchUser->profile_image_url : null;
+            }
+
+            Log::info('Subscribers ' . json_encode($subscribers));
             return response()->json($subscribers);
         } else {
             // Si no fue exitosa, capturar el mensaje de error
