@@ -12,7 +12,7 @@
             background-color: #AA61E2;
         }
         .container {
-            margin-top: 200px;
+            margin-top: 50px;
         }
         .card {
             background-color: #DEADED;
@@ -50,6 +50,39 @@
                             <a href="https://twitch.tv/hikarilof" target="_blank" class="btn btn-custom btn-lg">Ir al Canal de Twitch</a>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carrusel de suscriptores -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div id="subscriberCarousel" class="carousel slide" data-ride="carousel">
+                    <div class="carousel-inner">
+                        <!-- Aquí se mostrarán las tarjetas de los suscriptores -->
+                        @foreach ($subscribers as $index => $subscriber)
+                            <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
+                                <div class="card">
+                                    <img src="{{ $subscriber['profile_image_url'] }}" class="card-img-top" alt="Imagen de perfil">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ $subscriber['user_name'] }}</h5>
+                                        <p class="card-text">¡Gracias por ser un suscriptor!</p>
+                                        <a href="https://twitch.tv/{{ $subscriber['user_name'] }}" class="btn btn-custom">Ver Canal</a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Controles del carrusel -->
+                    <a class="carousel-control-prev" href="#subscriberCarousel" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Anterior</span>
+                    </a>
+                    <a class="carousel-control-next" href="#subscriberCarousel" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Siguiente</span>
+                    </a>
                 </div>
             </div>
         </div>

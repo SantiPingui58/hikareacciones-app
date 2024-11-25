@@ -14,15 +14,10 @@ use App\Http\Controllers\GoogleDriveController;
 |
 */
 
-
-Route::get('/', function () {
-    return view('home');
-})->name('home'); 
-
+Route::get('/', [AuthController::class, 'index'])->name('index');
 Route::get('auth/twitch', [AuthController::class, 'twitchLogin']);
 Route::get('auth/twitch/callback', [AuthController::class, 'twitchCallback']);
 Route::get('/panel', [AuthController::class, 'showPanel'])->name('panel');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::post('/request-access', [GoogleDriveController::class, 'accessFromForm']);
-Route::get('/twitch/subscribers', [AuthController::class, 'getSubscribers']);
 

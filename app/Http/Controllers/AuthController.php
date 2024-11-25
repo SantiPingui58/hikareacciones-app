@@ -11,6 +11,13 @@ use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
+
+    public function index() {
+    $subscribers = $this->getSubscribers();
+    return view('home', ['subscribers' => $subscribers]);
+    }
+
+
     public function twitchLogin()
     {
         $query = http_build_query([
