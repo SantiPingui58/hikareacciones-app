@@ -1,30 +1,3 @@
-<?php
-use App\Models\TwitchUser;
-
-// Obtener el usuario basado en el ID de Twitch almacenado en la sesión
-$user = TwitchUser::where('twitch_id', session('user_id'))->first();
-if (!$user) {
-    return redirect()->route('home');
-}
-
-// Verificar si el usuario se creó hace menos de 5 segundos
-$isRecentlyCreated = session('new_user');
-?>
-
-@if(session('success'))
-    <div class="alert alert-success" role="alert">
-        {{ session('success') }}
-    </div>
-@endif
-
-@if(session('error'))
-    <div class="alert alert-danger" role="alert">
-        {{ session('error') }}
-    </div>
-@endif
-
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -67,6 +40,9 @@ $isRecentlyCreated = session('new_user');
         .modal .modal-body strong {
             font-weight: bold;
         }
+        h2 {
+            color: black;
+        }
     </style>
 </head>
 <body>
@@ -80,10 +56,10 @@ $isRecentlyCreated = session('new_user');
                         <img src="{{ $user->profile_image_url }}" class="rounded-circle" alt="Perfil de Twitch" width="150">
                         <form action="/request-access" method="POST">
                             @csrf
-                                <a href="https://drive.google.com/drive/folders/1CZtJ_yJFXrzoe5-uCWSnYaF5liQYl1gn?usp=drive_link" target="_blank" class="btn btn-success btn-lg mb-3">Ir al Google Drive</a>
-                                <div class="form-group">
-                                    <label for="email">Si deseas modificar tu email de acceso al Drive, ingresa un nuevo correo electrónico:</label>
-                                </div>
+                            <a href="https://drive.google.com/drive/folders/1CZtJ_yJFXrzoe5-uCWSnYaF5liQYl1gn?usp=drive_link" target="_blank" class="btn btn-success btn-lg mb-3">Ir al Google Drive</a>
+                            <div class="form-group">
+                                <label for="email">Si deseas modificar tu email de acceso al Drive, ingresa un nuevo correo electrónico:</label>
+                            </div>
                             <div class="form-group">
                                 <input type="email" class="form-control" id="email" name="email" value="{{ $user->email }}" required>
                             </div>
@@ -95,6 +71,29 @@ $isRecentlyCreated = session('new_user');
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Título de Suscriptores -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h2 class="text-center">Suscriptores del canal</h2>
+            </div>
+        </div>
+
+        <!-- Fila de suscriptores -->
+        <div class="row mt-3">
+            <!-- Aquí se mostrarán las tarjetas de los suscriptores -->
+            @foreach ($subscribers as $index => $subscriber)
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 mb-4">
+                    <div class="card">
+                        <!-- Imagen de perfil o imagen por defecto -->
+                        <img src="{{ $subscriber['profile_image_url'] ?? asset('images/user.jpg') }}" class="card-img-top" alt="Imagen de perfil">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ $subscriber['user_name'] }}</h5>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
         </div>
     </div>
 

@@ -185,16 +185,24 @@ class AuthController extends Controller
 
         if ($response->successful()) {
             $subscribers = $response->json()['data'];
-			$missingProfileUsers = [];
+            $missingProfileUsers = [];
+
+            $subscriberIds = collect($subscribers)->pluck('user_id'); 
+
+            $twitchUsers = TwitchUser::whereIn('twitch_id', $subscriberIds)->get();
+         $twitchUsersAssoc = $twitchUsers->keyBy('twitch_id'); 
+            
             foreach ($subscribers as &$subscriber) {
-				 $twitchUser = TwitchUser::where('twitch_id', $subscriber['user_id'])->first();
-				if ($twitchUser && $twitchUser->profile_image_url) {
-					$subscriber['profile_image_url'] = $twitchUser->profile_image_url;
-				} else {
-					$missingProfileUsers[] = $subscriber['user_id'];
-				}
+
+                $twitchUser = $twitchUsersAssoc->get($subscriber['user_id']);
+                
+                if ($twitchUser && $twitchUser->profile_image_url) {
+                    $subscriber['profile_image_url'] = $twitchUser->profile_image_url;
+                } else {
+                    $missingProfileUsers[] = $subscriber['user_id'];
+                }
             }
-			
+
 			
 			 if (!empty($missingProfileUsers)) {
                 $userResponse = Http::withHeaders([
