@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('twitch:refresh-token')->hourly();
+        $schedule->command('twitch:check-subs')->daily();
     }
 
     /**
