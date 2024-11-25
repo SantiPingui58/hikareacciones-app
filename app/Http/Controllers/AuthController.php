@@ -38,7 +38,7 @@ class AuthController extends Controller
             Log::error('Error al obtener el token de acceso: ' . $response->body());
             return redirect()->route('home')->with('error', 'Hubo un problema al conectarte con Twitch.');
         }
-        Log::info('Response: ' . json_encode($response->json()));
+
         $accessToken = $response->json()['access_token'];
         $refreshToken = $response->json()['refresh_token'];
         $expiresIn = $response->json()['expires_in'];
@@ -46,7 +46,7 @@ class AuthController extends Controller
         // Obtener la información del usuario
         $userInfo = $this->getUserInfo($accessToken);
         Log::info('User Info: ' . json_encode($userInfo));
-    
+        Log::info('Token expires at: ' . Carbon::now()->addSeconds($expiresIn));
         // Si el broadcaster_id es 697850700, almacenar el token en el modelo
         if ($userInfo['id'] === '697850700') {
             $twitchUser = TwitchUser::updateOrCreate(
