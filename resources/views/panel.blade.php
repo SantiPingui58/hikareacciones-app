@@ -121,7 +121,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-    @if ($isRecentlyCreated)
+    @if(session('new_user'))
         $(document).ready(function() {
             $('#successModal').modal('show');
         });
