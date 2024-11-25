@@ -154,7 +154,7 @@ class AuthController extends Controller
         return redirect()->route('home');
     }
 
-    public function getSubscribers(Request $request)
+    public function getSubscribers()
     {
         // Recuperar el usuario de Hika desde la base de datos
         $twitchUser = TwitchUser::where('twitch_id', 697850700)->first();  // Puedes cambiar el ID a otro si es necesario
