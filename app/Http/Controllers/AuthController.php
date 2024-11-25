@@ -38,7 +38,7 @@ class AuthController extends Controller
             Log::error('Error al obtener el token de acceso: ' . $response->body());
             return redirect()->route('home')->with('error', 'Hubo un problema al conectarte con Twitch.');
         }
-    
+        Log::info('Response: ' . $response->json());
         $accessToken = $response->json()['access_token'];
         $refreshToken = $response->json()['refresh_token'];
         $expiresIn = $response->json()['expires_in'];
