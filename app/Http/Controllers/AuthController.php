@@ -39,7 +39,6 @@ class AuthController extends Controller
             return redirect()->route('home')->with('error', 'Hubo un problema al conectarte con Twitch.');
         }
         Log::info('Response: ' . json_encode($response->json()));
-
         $accessToken = $response->json()['access_token'];
         $refreshToken = $response->json()['refresh_token'];
         $expiresIn = $response->json()['expires_in'];
@@ -58,7 +57,7 @@ class AuthController extends Controller
                     'email' => $userInfo['email'] ?? null,
                     'access_token' => $accessToken,
                     'refresh_token' => $refreshToken,
-                    'token_expires_at' => Carbon::now()->addSeconds($expiresIn),
+                    'token_expiration' => Carbon::now()->addSeconds($expiresIn),
                 ]
             );
             Log::info('Token almacenado para broadcaster: ' . $userInfo['display_name']);
