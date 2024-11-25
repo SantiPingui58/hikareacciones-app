@@ -17,7 +17,7 @@ class AuthController extends Controller
             'client_id' => env('TWITCH_CLIENT_ID'),
             'redirect_uri' => env('TWITCH_REDIRECT_URI'),
             'response_type' => 'code',
-            'scope' => 'user:read:subscriptions user:read:email',
+            'scope' => 'user:read:subscriptions channel:read:subscriptions user:read:email',
         ]);
 
         return redirect('https://id.twitch.tv/oauth2/authorize?' . $query);

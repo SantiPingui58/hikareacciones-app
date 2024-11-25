@@ -40,6 +40,7 @@ class RefreshTwitchToken extends Command
                 'client_secret' => env('TWITCH_CLIENT_SECRET'),
                 'refresh_token' => $twitchUser->refresh_token,
                 'grant_type' => 'refresh_token',
+                'scope' => 'user:read:subscriptions channel:read:subscriptions user:read:email',
             ]);
 
             if ($response->successful()) {
