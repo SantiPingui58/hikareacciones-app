@@ -61,6 +61,9 @@
                     <div class="carousel-inner">
                         <!-- Aquí se mostrarán las tarjetas de los suscriptores -->
                         @foreach ($subscribers as $index => $subscriber)
+                        @php
+        Log::info($subscriber); 
+    @endphp
                             <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
                                 <div class="card">
                                 <img src="{{ $subscriber->profile_image_url }}" class="card-img-top" alt="Imagen de perfil">
