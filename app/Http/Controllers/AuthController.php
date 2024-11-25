@@ -142,13 +142,14 @@ class AuthController extends Controller
     public function showPanel()
     {
         $user = TwitchUser::where('twitch_id', session('user_id'))->first();
+        
         if (!$user) {
             return redirect()->route('home');
         }
-
-        return view('panel');
+    
+        return view('panel', compact('user')); 
     }
-
+    
     public function logout(Request $request)
     {
         // Eliminar el ID del usuario de la sesión
