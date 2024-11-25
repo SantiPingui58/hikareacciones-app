@@ -149,9 +149,8 @@ class AuthController extends Controller
 
     public function getSubscribers(Request $request)
     {
-
         // Recuperar el usuario de Hika desde la base de datos
-        $twitchUser = TwitchUser::where('twitch_id', 697850700)->first();
+        $twitchUser = TwitchUser::where('twitch_id', 697850700)->first();  // Puedes cambiar el ID a otro si es necesario
     
         // Verificar si el usuario está autenticado y tiene un access_token
         if (!$twitchUser || !$twitchUser->access_token) {
@@ -162,7 +161,7 @@ class AuthController extends Controller
         $accessToken = $twitchUser->access_token;
     
         // Obtener el broadcaster_id desde el usuario de Twitch o configurarlo manualmente
-        $broadcasterId = '697850700';  // Puedes cambiar esto por el ID del broadcaster que quieras, o obtenerlo del usuario autenticado si es necesario
+        $broadcasterId = $twitchUser->twitch_id;  // Usamos el ID del broadcaster del usuario autenticado
     
         // Realizar la solicitud a la API de Twitch para obtener los suscriptores
         $response = Http::withHeaders([
@@ -180,7 +179,7 @@ class AuthController extends Controller
         } else {
             // Si no fue exitosa, capturar el mensaje de error
             $errorMessage = $response->json()['message'] ?? 'No se pudieron obtener los suscriptores';
-            $errorCode = $response->json()['status'] ?? 400; 
+            $errorCode = $response->json()['status'] ?? 400;
             return response()->json(['error' => $errorMessage], $errorCode);
         }
     }
