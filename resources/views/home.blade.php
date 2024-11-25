@@ -63,11 +63,11 @@
                         @foreach ($subscribers as $index => $subscriber)
                             <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
                                 <div class="card">
-                                    <img src="{{ $subscriber['profile_image_url'] }}" class="card-img-top" alt="Imagen de perfil">
+                                <img src="{{ $subscriber->profile_image_url }}" class="card-img-top" alt="Imagen de perfil">
                                     <div class="card-body">
                                         <h5 class="card-title">{{ $subscriber['user_name'] }}</h5>
                                         <p class="card-text">¡Gracias por ser un suscriptor!</p>
-                                        <a href="https://twitch.tv/{{ $subscriber['user_name'] }}" class="btn btn-custom">Ver Canal</a>
+                                        <a href="https://twitch.tv/{{ $subscriber->user_name }}" class="btn btn-custom">Ver Canal</a>
                                     </div>
                                 </div>
                             </div>
