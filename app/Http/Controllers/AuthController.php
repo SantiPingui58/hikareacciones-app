@@ -148,7 +148,7 @@ class AuthController extends Controller
         $subscribers = json_decode($subscribers, true);
 
     
-        return view('panel', compact('user','suscribers')); 
+        return view('panel', compact('user','subscribers')); 
     }
     
     public function logout(Request $request)
